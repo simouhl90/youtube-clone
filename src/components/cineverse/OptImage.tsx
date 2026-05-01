@@ -13,10 +13,14 @@ interface OptImageProps {
 
 export default function OptImage({ src, alt, className = '', style, loading = 'lazy', onClick }: OptImageProps) {
   const [loaded, setLoaded] = useState(false);
+  const isPositioned = className.includes('absolute') || className.includes('fixed');
 
   return (
-    <div className={`relative overflow-hidden ${className}`} style={style} onClick={onClick}>
-      {/* Blur placeholder - dominant color base */}
+    <div
+      className={`overflow-hidden ${isPositioned ? '' : 'relative'} ${className}`}
+      style={style}
+      onClick={onClick}
+    >
       {!loaded && (
         <div className="absolute inset-0 bg-white/[0.06] animate-pulse" />
       )}

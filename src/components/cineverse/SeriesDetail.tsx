@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -16,7 +16,6 @@ import type { Review } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { getSeriesById, series as allSeries } from '@/lib/mock-data';
 import SeriesRow from './SeriesRow';
-import { SeriesDetailSkeleton } from './Skeletons';
 import OptImage from './OptImage';
 
 export default function SeriesDetail() {
@@ -30,14 +29,6 @@ export default function SeriesDetail() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) return <SeriesDetailSkeleton />;
 
   if (!series) {
     return (
@@ -68,7 +59,7 @@ export default function SeriesDetail() {
     <div className="min-h-screen pb-10">
       {/* Backdrop */}
       <div className="relative h-[45vh] min-h-[340px] overflow-hidden">
-        <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" style={{ objectFit: 'cover' as React.CSSProperties['objectFit'] }} />
+        <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a1a]/50 via-[#0a0a1a]/20 to-[#0a0a1a]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a] via-transparent to-transparent" />
 

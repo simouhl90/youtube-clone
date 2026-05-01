@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, TrendingUp, X } from 'lucide-react';
 import { searchSeries, series as allSeries } from '@/lib/mock-data';
@@ -74,22 +74,21 @@ export default function SearchView() {
     return () => observer.disconnect();
   }, [visibleCount, filteredResults.length]);
 
-  const handleSearch = useCallback((value: string) => {
+  const handleSearch = (value: string) => {
     setQuery(value);
     setVisibleCount(9);
     if (value.trim()) {
       setSearching(true);
-      const timer = setTimeout(() => setSearching(false), 600);
-      return () => clearTimeout(timer);
+      setTimeout(() => setSearching(false), 600);
     } else {
       setSearching(false);
     }
-  }, []);
+  };
 
-  const handleGenreSelect = useCallback((genre: string | null) => {
+  const handleGenreSelect = (genre: string | null) => {
     setSelectedGenre(genre);
     setVisibleCount(9);
-  }, []);
+  };
 
   return (
     <div className="min-h-screen pb-28">

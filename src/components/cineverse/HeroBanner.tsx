@@ -60,7 +60,7 @@ export default function HeroBanner() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-0"
         >
-          <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" style={{ objectFit: 'cover' }} />
+          <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" />
         </motion.div>
       </AnimatePresence>
 
