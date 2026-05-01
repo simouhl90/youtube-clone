@@ -52,3 +52,10 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Database
+*.db
+*.db-journal
+prisma/migrations/
+
+# Lock
+bun.lock
