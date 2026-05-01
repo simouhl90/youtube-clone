@@ -1,101 +1,111 @@
-export interface Channel {
-  id: string;
+export interface CastMember {
   name: string;
-  handle: string;
-  avatarUrl: string;
-  bannerUrl?: string;
-  subscribers: number;
-  isVerified: boolean;
-  description?: string;
-  createdAt: string;
-  videos?: Video[];
+  role: string;
+  photo: string;
 }
 
-export interface Video {
+export interface Episode {
   id: string;
+  number: number;
   title: string;
-  thumbnailUrl: string;
   description: string;
   duration: string;
-  views: number;
-  likes: number;
-  dislikes: number;
-  isLive: boolean;
-  category: string;
-  uploadedAt: string;
-  channelId: string;
-  channel?: Channel;
-  comments?: Comment[];
+  thumbnail: string;
+  rating: number;
+  airDate: string;
 }
 
-export interface Comment {
+export interface Season {
+  number: number;
+  episodes: Episode[];
+  year: string;
+}
+
+export interface Series {
   id: string;
-  text: string;
-  author: string;
-  avatarUrl: string;
-  likes: number;
-  createdAt: string;
-  videoId: string;
+  title: string;
+  titleAr?: string;
+  poster: string;
+  backdrop: string;
+  logo?: string;
+  description: string;
+  genre: string[];
+  year: number;
+  rating: number;
+  ratingCount: number;
+  maturity: string;
+  seasons: Season[];
+  cast: CastMember[];
+  status: 'Airing' | 'Completed' | 'Upcoming';
+  studio: string;
+  country: string;
+  language: string;
+  totalEpisodes: number;
+  featured?: boolean;
+  trending?: boolean;
 }
 
-export type AppView = 
-  | { type: 'home' }
-  | { type: 'video'; videoId: string }
-  | { type: 'search'; query?: string }
-  | { type: 'subscriptions' }
-  | { type: 'library' }
-  | { type: 'shorts' };
+export interface WatchProgress {
+  seriesId: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  progress: number; // 0-100
+}
 
-export const CATEGORIES = [
+export type AppView =
+  | { type: 'home' }
+  | { type: 'series'; seriesId: string }
+  | { type: 'search'; query?: string }
+  | { type: 'watchlist' }
+  | { type: 'profile' }
+  | { type: 'discover' };
+
+export const GENRES = [
   'All',
-  'Trending',
-  'Music',
-  'Gaming',
-  'News',
-  'Sports',
-  'Learning',
-  'Fashion',
-  'Podcasts',
-  'Movies',
-  'Live',
-  'Comedy',
-  'Technology',
-  'Cooking',
-  'Travel',
-  'Science',
+  '🔥 Trending',
+  '🧛 Horror',
+  '🎭 Drama',
+  '😂 Comedy',
+  '💎 Action',
+  '🔍 Mystery',
+  '💔 Romance',
+  '🔬 Sci-Fi',
+  '📜 History',
+  '🍜 Asian',
+  '🇹🇷 Turkish',
+  '👨‍👩‍👧 Family',
+  '🕵️ Thriller',
+  '🌅 Fantasy',
 ] as const;
 
-export type Category = (typeof CATEGORIES)[number];
+export type Genre = (typeof GENRES)[number];
 
-export function formatViews(views: number): string {
-  if (views >= 1_000_000_000) return `${(views / 1_000_000_000).toFixed(1)}B views`;
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M views`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K views`;
-  return `${views} views`;
+export function formatRating(rating: number): string {
+  return rating.toFixed(1);
 }
 
-export function formatSubscribers(subs: number): string {
-  if (subs >= 1_000_000) return `${(subs / 1_000_000).toFixed(1)}M subscribers`;
-  if (subs >= 1_000) return `${(subs / 1_000).toFixed(1)}K subscribers`;
-  return `${subs} subscribers`;
+export function formatYear(year: number): string {
+  return year.toString();
 }
 
-export function timeAgo(date: string): string {
-  const now = new Date();
-  const past = new Date(date);
-  const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-  
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days !== 1 ? 's' : ''} ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) return `${weeks} week${weeks !== 1 ? 's' : ''} ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`;
-  const years = Math.floor(days / 365);
-  return `${years} year${years !== 1 ? 's' : ''} ago`;
+export function formatDuration(duration: string): string {
+  return duration;
+}
+
+export function getGenreEmoji(genre: string): string {
+  const map: Record<string, string> = {
+    'Action': '💎', 'Comedy': '😂', 'Drama': '🎭', 'Horror': '🧛',
+    'Romance': '💔', 'Sci-Fi': '🔬', 'Thriller': '🕵️', 'Mystery': '🔍',
+    'Fantasy': '🌅', 'History': '📜', 'Family': '👨‍👩‍👧', 'Crime': '🔫',
+    'War': '⚔️', 'Animation': '🎨', 'Documentary': '📹', 'Asian': '🍜',
+    'Turkish': '🇹🇷', 'Trending': '🔥',
+  };
+  return map[genre] || '🎬';
+}
+
+export function getMaturityColor(maturity: string): string {
+  if (maturity.includes('18') || maturity === 'R') return 'bg-red-600';
+  if (maturity.includes('16') || maturity === 'TV-MA') return 'bg-orange-500';
+  if (maturity.includes('13') || maturity === 'PG-13') return 'bg-yellow-500';
+  return 'bg-green-500';
 }

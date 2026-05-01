@@ -1,39 +1,29 @@
 import { create } from 'zustand';
-import type { AppView, Category } from '@/types';
+import type { AppView, WatchProgress } from '@/types';
+import { defaultContinueWatching } from '@/lib/mock-data';
 
 interface AppState {
   currentView: AppView;
-  selectedCategory: Category;
   history: AppView[];
-  isSubscribed: Record<string, boolean>;
-  likedVideos: Record<string, boolean>;
-  dislikedVideos: Record<string, boolean>;
-  searchHistory: string[];
+  watchlist: Set<string>;
+  continueWatching: WatchProgress[];
 
   navigate: (view: AppView) => void;
   goBack: () => void;
-  setCategory: (category: Category) => void;
-  toggleSubscribe: (channelId: string) => void;
-  toggleLike: (videoId: string) => void;
-  toggleDislike: (videoId: string) => void;
-  addSearchHistory: (query: string) => void;
-  clearSearchHistory: () => void;
+  toggleWatchlist: (seriesId: string) => void;
+  isInWatchlist: (seriesId: string) => boolean;
+  updateProgress: (progress: WatchProgress) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
   currentView: { type: 'home' },
-  selectedCategory: 'All',
   history: [],
-  isSubscribed: {},
-  likedVideos: {},
-  dislikedVideos: {},
-  searchHistory: ['Next.js tutorial', 'React hooks', 'TypeScript tips', 'CSS animations'],
+  watchlist: new Set<string>(),
+  continueWatching: defaultContinueWatching,
 
   navigate: (view) => {
     const { currentView, history } = get();
-    // Don't push if navigating to the same view
-    if (view.type === 'video' && currentView.type === 'video' && view.videoId === currentView.videoId) return;
-    if (view.type === 'search' && currentView.type === 'search' && view.query === currentView.query) return;
+    if (view.type === 'series' && currentView.type === 'series' && view.seriesId === currentView.seriesId) return;
     set({ currentView: view, history: [...history, currentView] });
   },
 
@@ -47,54 +37,35 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ currentView: previous, history: history.slice(0, -1) });
   },
 
-  setCategory: (category) => set({ selectedCategory: category }),
-  
-  toggleSubscribe: (channelId) => {
-    set((state) => ({
-      isSubscribed: {
-        ...state.isSubscribed,
-        [channelId]: !state.isSubscribed[channelId],
-      },
-    }));
-  },
-
-  toggleLike: (videoId) => {
+  toggleWatchlist: (seriesId) => {
     set((state) => {
-      const isCurrentlyLiked = state.likedVideos[videoId] || false;
-      return {
-        likedVideos: {
-          ...state.likedVideos,
-          [videoId]: !isCurrentlyLiked,
-        },
-        dislikedVideos: {
-          ...state.dislikedVideos,
-          [videoId]: false,
-        },
-      };
+      const newWatchlist = new Set(state.watchlist);
+      if (newWatchlist.has(seriesId)) {
+        newWatchlist.delete(seriesId);
+      } else {
+        newWatchlist.add(seriesId);
+      }
+      return { watchlist: newWatchlist };
     });
   },
 
-  toggleDislike: (videoId) => {
+  isInWatchlist: (seriesId) => {
+    return get().watchlist.has(seriesId);
+  },
+
+  updateProgress: (progress) => {
     set((state) => {
-      const isCurrentlyDisliked = state.dislikedVideos[videoId] || false;
-      return {
-        dislikedVideos: {
-          ...state.dislikedVideos,
-          [videoId]: !isCurrentlyDisliked,
-        },
-        likedVideos: {
-          ...state.likedVideos,
-          [videoId]: false,
-        },
-      };
+      const existing = state.continueWatching.findIndex(
+        (p) => p.seriesId === progress.seriesId
+      );
+      let newProgress: WatchProgress[];
+      if (existing >= 0) {
+        newProgress = [...state.continueWatching];
+        newProgress[existing] = progress;
+      } else {
+        newProgress = [progress, ...state.continueWatching];
+      }
+      return { continueWatching: newProgress };
     });
   },
-
-  addSearchHistory: (query) => {
-    set((state) => ({
-      searchHistory: [query, ...state.searchHistory.filter(q => q !== query)].slice(0, 10),
-    }));
-  },
-
-  clearSearchHistory: () => set({ searchHistory: [] }),
 }));

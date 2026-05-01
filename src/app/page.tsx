@@ -1,7 +1,7 @@
 'use client';
 
-import YouTubeApp from '@/components/youtube/YouTubeApp';
+import CineVerseApp from '@/components/cineverse/CineVerseApp';
 
 export default function Home() {
-  return <YouTubeApp />;
+  return <CineVerseApp />;
 }

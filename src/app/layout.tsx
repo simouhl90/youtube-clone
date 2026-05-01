@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "YouTube",
-  description: "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world.",
+  title: "CineVerse - Premium Streaming",
+  description: "Stream premium TV series from around the world. Drama, action, sci-fi, and more.",
   icons: {
-    icon: "https://www.youtube.com/favicon.ico",
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>",
   },
 };
 
@@ -28,8 +28,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f0f0f" },
+    { media: "(prefers-color-scheme: light)", color: "#0a0a1a" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a1a" },
   ],
 };
 
