@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getVideoById, getRelatedVideos } from '@/lib/mock-data';
 
 export async function GET(
   request: NextRequest,
@@ -7,45 +7,17 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-
-    const video = await db.video.findUnique({
-      where: { id },
-      include: {
-        channel: true,
-        comments: {
-          orderBy: { likes: 'desc' },
-        },
-      },
-    });
+    const video = getVideoById(id);
 
     if (!video) {
       return NextResponse.json({ error: 'Video not found' }, { status: 404 });
     }
 
-    // Get related videos from same category
-    const relatedVideos = await db.video.findMany({
-      where: {
-        category: video.category,
-        id: { not: video.id },
-      },
-      take: 10,
-      orderBy: { views: 'desc' },
-      include: {
-        channel: {
-          select: {
-            id: true,
-            name: true,
-            handle: true,
-            avatarUrl: true,
-            subscribers: true,
-            isVerified: true,
-          },
-        },
-      },
-    });
+    const relatedVideos = getRelatedVideos(id);
 
     return NextResponse.json({
       video,
+      comments: video.comments || [],
       relatedVideos,
     });
   } catch (error) {
