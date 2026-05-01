@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -16,6 +16,8 @@ import type { Review } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { getSeriesById, series as allSeries } from '@/lib/mock-data';
 import SeriesRow from './SeriesRow';
+import { SeriesDetailSkeleton } from './Skeletons';
+import OptImage from './OptImage';
 
 export default function SeriesDetail() {
   const { currentView, goBack, navigate, toggleWatchlist, watchlist, addReview } = useAppStore();
@@ -28,6 +30,14 @@ export default function SeriesDetail() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <SeriesDetailSkeleton />;
 
   if (!series) {
     return (
@@ -58,10 +68,7 @@ export default function SeriesDetail() {
     <div className="min-h-screen pb-10">
       {/* Backdrop */}
       <div className="relative h-[45vh] min-h-[340px] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${series.backdrop})` }}
-        />
+        <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" style={{ objectFit: 'cover' as React.CSSProperties['objectFit'] }} />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a1a]/50 via-[#0a0a1a]/20 to-[#0a0a1a]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a1a] via-transparent to-transparent" />
 
@@ -101,11 +108,7 @@ export default function SeriesDetail() {
         {/* Poster overlapping */}
         <div className="absolute -bottom-16 left-5 z-10">
           <div className="w-[110px] rounded-xl overflow-hidden shadow-2xl shadow-purple-500/20 ring-2 ring-white/10">
-            <img
-              src={series.poster}
-              alt={series.title}
-              className="w-full aspect-[2/3] object-cover"
-            />
+            <OptImage src={series.poster} alt={series.title} className="w-full aspect-[2/3]" />
           </div>
         </div>
       </div>
@@ -162,6 +165,32 @@ export default function SeriesDetail() {
           <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${statusColor}`}>
             {series.status}
           </span>
+        </div>
+
+        {/* Studio - Clickable */}
+        <div className="mt-3">
+          <button
+            onClick={() => navigate({ type: 'studio', studioName: series.studio })}
+            className="flex items-center gap-2 group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-white/10 transition-colors">
+              <span className="text-sm">🎬</span>
+            </div>
+            <div className="text-left">
+              <p className="text-xs text-white/40">Studio</p>
+              <p className="text-sm font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">{series.studio}</p>
+            </div>
+          </button>
+        </div>
+        <div className="flex gap-4 mt-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-white/30">🌍</span>
+            <span className="text-xs text-white/50">{series.country}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-white/30">💬</span>
+            <span className="text-xs text-white/50">{series.language}</span>
+          </div>
         </div>
 
         {/* Play Button */}
@@ -394,12 +423,7 @@ function EpisodeItem({
     >
       {/* Thumbnail */}
       <div className="relative w-[130px] flex-shrink-0 aspect-video rounded-lg overflow-hidden">
-        <img
-          src={thumbnail}
-          alt={title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+        <OptImage src={thumbnail} alt={title} className="w-full h-full" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
             <Play size={14} fill="white" className="text-white ml-0.5" />

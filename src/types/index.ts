@@ -66,6 +66,7 @@ export type AppView =
   | { type: 'series'; seriesId: string }
   | { type: 'episode'; seriesId: string; seasonNumber: number; episodeNumber: number }
   | { type: 'cast'; castName: string; castPhoto: string; castRole: string }
+  | { type: 'studio'; studioName: string }
   | { type: 'search'; query?: string }
   | { type: 'watchlist' }
   | { type: 'profile' }

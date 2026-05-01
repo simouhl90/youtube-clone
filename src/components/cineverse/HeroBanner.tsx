@@ -6,6 +6,7 @@ import { Play, Plus, Star } from 'lucide-react';
 import { getFeaturedSeries } from '@/lib/mock-data';
 import { useAppStore } from '@/store/useAppStore';
 import type { Series } from '@/types';
+import OptImage from './OptImage';
 
 export default function HeroBanner() {
   const featured = getFeaturedSeries();
@@ -59,10 +60,7 @@ export default function HeroBanner() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-0"
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${series.backdrop})` }}
-          />
+          <OptImage src={series.backdrop} alt={series.title} className="absolute inset-0" style={{ objectFit: 'cover' }} />
         </motion.div>
       </AnimatePresence>
 

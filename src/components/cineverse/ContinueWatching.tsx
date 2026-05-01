@@ -6,6 +6,7 @@ import { Play } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { series as allSeries } from '@/lib/mock-data';
 import type { WatchProgress } from '@/types';
+import OptImage from './OptImage';
 
 interface ContinueWatchingProps {
   items: WatchProgress[];
@@ -49,12 +50,7 @@ export default function ContinueWatching({ items }: ContinueWatchingProps) {
             >
               {/* Thumbnail */}
               <div className="relative aspect-video rounded-xl overflow-hidden">
-                <img
-                  src={episode?.thumbnail || series.backdrop}
-                  alt={episode?.title || series.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
+                <OptImage src={episode?.thumbnail || series.backdrop} alt={episode?.title || series.title} className="w-full h-full" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
                 {/* Play button */}

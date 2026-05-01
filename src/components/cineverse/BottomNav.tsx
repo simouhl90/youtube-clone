@@ -4,6 +4,7 @@ import { Home, Compass, Search, Heart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import type { AppView } from '@/types';
+import { useHaptic } from '@/hooks/useHaptic';
 
 const tabs: { icon: typeof Home; label: string; view: AppView }[] = [
   { icon: Home, label: 'Home', view: { type: 'home' } },
@@ -15,6 +16,7 @@ const tabs: { icon: typeof Home; label: string; view: AppView }[] = [
 
 export default function BottomNav() {
   const { currentView, navigate } = useAppStore();
+  const { light } = useHaptic();
 
   const isActive = (type: string) => {
     if (type === 'home' && currentView.type === 'home') return true;
@@ -32,7 +34,7 @@ export default function BottomNav() {
             return (
               <button
                 key={tab.label}
-                onClick={() => navigate(tab.view)}
+                onClick={() => { light(); navigate(tab.view); }}
                 className="relative flex flex-col items-center gap-1 py-1 px-3 min-w-[60px] transition-colors"
               >
                 <motion.div

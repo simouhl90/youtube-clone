@@ -4,11 +4,14 @@ import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { getTopSeries } from '@/lib/mock-data';
 import { useAppStore } from '@/store/useAppStore';
+import OptImage from './OptImage';
+import { useHaptic } from '@/hooks/useHaptic';
 
 export default function Top10Row() {
   const topSeries = getTopSeries(10);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { navigate } = useAppStore();
+  const { light } = useHaptic();
 
   return (
     <div className="relative">
@@ -36,7 +39,7 @@ export default function Top10Row() {
               transition={{ duration: 0.5, delay: index * 0.06 }}
               whileHover={{ scale: 1.04, y: -4 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate({ type: 'series', seriesId: series.id })}
+              onClick={() => { light(); navigate({ type: 'series', seriesId: series.id }); }}
               className={`relative flex-shrink-0 cursor-pointer group ${
                 isFirst ? 'w-[160px]' : 'w-[120px]'
               }`}
@@ -63,12 +66,7 @@ export default function Top10Row() {
                   isFirst ? 'aspect-[2/3]' : 'aspect-[2/3]'
                 }`}
               >
-                <img
-                  src={series.poster}
-                  alt={series.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
+                <OptImage src={series.poster} alt={series.title} className="w-full h-full" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
                 {/* Title overlay */}

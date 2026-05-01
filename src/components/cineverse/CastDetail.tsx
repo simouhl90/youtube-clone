@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { series as allSeries } from '@/lib/mock-data';
 import SeriesCard from './SeriesCard';
+import OptImage from './OptImage';
 
 export default function CastDetail() {
   const { currentView, goBack, navigate } = useAppStore();
@@ -44,11 +45,7 @@ export default function CastDetail() {
         {/* Gradient glow behind avatar */}
         <div className="relative">
           <div className="absolute inset-0 w-28 h-28 rounded-full bg-purple-500/30 blur-3xl scale-150" />
-          <img
-            src={castPhoto}
-            alt={castName}
-            className="relative w-28 h-28 rounded-full object-cover ring-2 ring-purple-500/50 shadow-xl"
-          />
+          <OptImage src={castPhoto} alt={castName} className="relative w-28 h-28 rounded-full object-cover ring-2 ring-purple-500/50 shadow-xl" />
         </div>
         <h2 className="mt-4 text-2xl font-bold text-white">{castName}</h2>
         <p className="mt-1 text-sm text-white/50">{castRole}</p>

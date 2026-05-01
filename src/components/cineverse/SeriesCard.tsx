@@ -5,6 +5,8 @@ import { Star, Heart } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import type { Series } from '@/types';
 import { getGenreEmoji } from '@/types';
+import OptImage from './OptImage';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface SeriesCardProps {
   series: Series;
@@ -14,6 +16,7 @@ interface SeriesCardProps {
 
 export default function SeriesCard({ series, size = 'normal', index = 0 }: SeriesCardProps) {
   const { navigate, toggleWatchlist, watchlist } = useAppStore();
+  const { light } = useHaptic();
   const isWatchlisted = watchlist.has(series.id);
 
   return (
@@ -23,17 +26,12 @@ export default function SeriesCard({ series, size = 'normal', index = 0 }: Serie
       transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
-      onClick={() => navigate({ type: 'series', seriesId: series.id })}
+      onClick={() => { light(); navigate({ type: 'series', seriesId: series.id }); }}
       className={`relative flex-shrink-0 cursor-pointer group ${size === 'large' ? 'w-[180px]' : 'w-[140px]'}`}
     >
       {/* Poster */}
       <div className={`relative rounded-2xl overflow-hidden ${size === 'large' ? 'aspect-[2/3]' : 'aspect-[2/3]'} shadow-lg shadow-purple-500/5`}>
-        <img
-          src={series.poster}
-          alt={series.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-        />
+        <OptImage src={series.poster} alt={series.title} className="w-full h-full" />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />

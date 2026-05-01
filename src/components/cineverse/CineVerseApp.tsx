@@ -11,6 +11,8 @@ import DiscoverView from './DiscoverView';
 import ProfileView from './ProfileView';
 import CastDetail from './CastDetail';
 import EpisodePlayer from './EpisodePlayer';
+import ErrorBoundary from './ErrorBoundary';
+import StudioDetail from './StudioDetail';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -22,6 +24,7 @@ export default function CineVerseApp() {
   const { currentView, splashDone } = useAppStore();
 
   return (
+    <ErrorBoundary>
     <div className="mx-auto max-w-2xl min-h-screen relative overflow-hidden">
       {!splashDone && <SplashScreen />}
 
@@ -129,7 +132,21 @@ export default function CineVerseApp() {
             <CastDetail />
           </motion.div>
         )}
+
+        {currentView.type === 'studio' && (
+          <motion.div
+            key={`studio-${currentView.studioName}`}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <StudioDetail />
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
+    </ErrorBoundary>
   );
 }

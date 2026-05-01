@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TopBar from './TopBar';
 import HeroBanner from './HeroBanner';
@@ -16,10 +16,17 @@ import {
 } from '@/lib/mock-data';
 import { useAppStore } from '@/store/useAppStore';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { HeroBannerSkeleton, SeriesRowSkeleton } from './Skeletons';
 
 export default function HomeView() {
   const { continueWatching } = useAppStore();
+  const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
   const { handlers, isPulling, pullDistance } = usePullToRefresh(() => { setRefreshKey(k => k + 1); });
 
   const trending = getTrendingSeries();
@@ -42,10 +49,18 @@ export default function HomeView() {
         </motion.div>
       )}
       <TopBar />
-      <HeroBanner />
+      {loading ? <HeroBannerSkeleton /> : <HeroBanner />}
+
+      {/* Skeleton rows while loading */}
+      {loading && (
+        <div className="mt-10">
+          <SeriesRowSkeleton />
+          <SeriesRowSkeleton />
+        </div>
+      )}
 
       {/* Continue Watching */}
-      {continueWatching.length > 0 && (
+      {!loading && continueWatching.length > 0 && (
         <div className="mt-8">
           <ContinueWatching items={continueWatching} />
         </div>

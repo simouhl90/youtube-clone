@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, TrendingUp, X } from 'lucide-react';
 import { searchSeries, series as allSeries } from '@/lib/mock-data';
 import SeriesCard from './SeriesCard';
+import { SearchResultsSkeleton } from './Skeletons';
 import { GENRES } from '@/types';
 
 const trendingSearches = [
@@ -35,7 +36,10 @@ function useDebouncedValue(value: string, delay: number): string {
 export default function SearchView() {
   const [query, setQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [visibleCount, setVisibleCount] = useState(9);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
@@ -52,6 +56,40 @@ export default function SearchView() {
   }, [results, selectedGenre, query]);
 
   const hasQuery = query.trim().length > 0;
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleCount < filteredResults.length) {
+          setVisibleCount((prev) => Math.min(prev + 6, filteredResults.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredResults.length]);
+
+  const handleSearch = useCallback((value: string) => {
+    setQuery(value);
+    setVisibleCount(9);
+    if (value.trim()) {
+      setSearching(true);
+      const timer = setTimeout(() => setSearching(false), 600);
+      return () => clearTimeout(timer);
+    } else {
+      setSearching(false);
+    }
+  }, []);
+
+  const handleGenreSelect = useCallback((genre: string | null) => {
+    setSelectedGenre(genre);
+    setVisibleCount(9);
+  }, []);
 
   return (
     <div className="min-h-screen pb-28">
@@ -70,7 +108,7 @@ export default function SearchView() {
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => inputRef.current?.select()}
             onBlur={() => {}}
             placeholder="Search series, genres, actors..."
@@ -78,7 +116,7 @@ export default function SearchView() {
           />
           {query && (
             <button
-              onClick={() => setQuery('')}
+              onClick={() => handleSearch('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
             >
               <X size={16} />
@@ -108,7 +146,7 @@ export default function SearchView() {
                   <motion.button
                     key={term}
                     whileTap={{ scale: 0.93 }}
-                    onClick={() => setQuery(term)}
+                    onClick={() => handleSearch(term)}
                     className="px-4 py-2 rounded-full text-sm text-white/60 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
                   >
                     {term}
@@ -145,7 +183,7 @@ export default function SearchView() {
                       <motion.button
                         key={genre}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedGenre(genreName)}
+                        onClick={() => handleGenreSelect(genreName)}
                         className={`relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${
                           gradients[genre] || 'from-purple-900/40 to-pink-900/30'
                         } border border-white/10 hover:border-white/20 transition-all`}
@@ -175,7 +213,7 @@ export default function SearchView() {
               <div className="flex items-center gap-2 mt-4 mb-4">
                 <motion.button
                   whileTap={{ scale: 0.93 }}
-                  onClick={() => setSelectedGenre(null)}
+                  onClick={() => handleGenreSelect(null)}
                   className="px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white border border-white/10"
                 >
                   All
@@ -187,7 +225,7 @@ export default function SearchView() {
                     <motion.button
                       key={genre}
                       whileTap={{ scale: 0.93 }}
-                      onClick={() => setSelectedGenre(genre)}
+                      onClick={() => handleGenreSelect(genre)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                         selectedGenre === genre
                           ? 'bg-purple-600 text-white'
@@ -206,14 +244,24 @@ export default function SearchView() {
               </p>
             )}
 
-            {filteredResults.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3">
-                {filteredResults.map((s, i) => (
-                  <div key={s.id} className="flex justify-center">
-                    <SeriesCard series={s} index={i} />
+            {searching && filteredResults.length === 0 ? (
+              <SearchResultsSkeleton />
+            ) : filteredResults.length > 0 ? (
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  {filteredResults.slice(0, visibleCount).map((s, i) => (
+                    <div key={s.id} className="flex justify-center">
+                      <SeriesCard series={s} index={i} />
+                    </div>
+                  ))}
+                </div>
+
+                {visibleCount < filteredResults.length && (
+                  <div ref={sentinelRef} className="flex justify-center py-8">
+                    <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20">
                 <Search size={48} className="text-white/10 mb-4" />

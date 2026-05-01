@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import SeriesRow from './SeriesRow';
+import { SeriesRowSkeleton } from './Skeletons';
 import {
   getRecentlyAdded,
   series as allSeries,
@@ -14,6 +15,13 @@ const allGenres = ['All', ...new Set(allSeries.flatMap((s) => s.genre))];
 
 export default function DiscoverView() {
   const [selectedGenre, setSelectedGenre] = useState('All');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const highestRated = [...allSeries].sort((a, b) => b.rating - a.rating);
   const popular = [...allSeries].sort(
     (a, b) => b.ratingCount - a.ratingCount
@@ -47,7 +55,13 @@ export default function DiscoverView() {
       </div>
 
       {/* Filtered Results */}
-      {selectedGenre !== 'All' && (
+      {loading && (
+        <div className="mt-6">
+          <SeriesRowSkeleton />
+          <SeriesRowSkeleton />
+        </div>
+      )}
+      {!loading && selectedGenre !== 'All' && (
         <div className="mt-6">
           <SeriesRow
             title={selectedGenre}
@@ -58,7 +72,7 @@ export default function DiscoverView() {
       )}
 
       {/* Popular This Week */}
-      {selectedGenre === 'All' && (
+      {!loading && selectedGenre === 'All' && (
         <>
           <div className="mt-6">
             <SeriesRow title="Popular This Week" series={popular.slice(0, 10)} emoji="📊" />
