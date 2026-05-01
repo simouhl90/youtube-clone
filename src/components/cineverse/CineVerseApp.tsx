@@ -2,12 +2,15 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
+import SplashScreen from './SplashScreen';
 import HomeView from './HomeView';
 import SeriesDetail from './SeriesDetail';
 import SearchView from './SearchView';
 import WatchlistView from './WatchlistView';
 import DiscoverView from './DiscoverView';
 import ProfileView from './ProfileView';
+import CastDetail from './CastDetail';
+import EpisodePlayer from './EpisodePlayer';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -16,10 +19,12 @@ const pageVariants = {
 };
 
 export default function CineVerseApp() {
-  const { currentView } = useAppStore();
+  const { currentView, splashDone } = useAppStore();
 
   return (
     <div className="mx-auto max-w-2xl min-h-screen relative overflow-hidden">
+      {!splashDone && <SplashScreen />}
+
       <AnimatePresence mode="wait">
         {currentView.type === 'home' && (
           <motion.div
@@ -44,6 +49,19 @@ export default function CineVerseApp() {
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <SeriesDetail />
+          </motion.div>
+        )}
+
+        {currentView.type === 'episode' && (
+          <motion.div
+            key={`episode-${currentView.seriesId}-s${currentView.seasonNumber}e${currentView.episodeNumber}`}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <EpisodePlayer />
           </motion.div>
         )}
 
@@ -96,6 +114,19 @@ export default function CineVerseApp() {
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <ProfileView />
+          </motion.div>
+        )}
+
+        {currentView.type === 'cast' && (
+          <motion.div
+            key={`cast-${currentView.castName}`}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <CastDetail />
           </motion.div>
         )}
       </AnimatePresence>

@@ -2,8 +2,12 @@
 
 import { Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function TopBar() {
+  const notifications = useAppStore((s) => s.notifications);
+  const dismissNotifications = useAppStore((s) => s.dismissNotifications);
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -17,9 +21,24 @@ export default function TopBar() {
             CineVerse
           </h1>
           <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-full transition-colors hover:bg-white/10 active:scale-90">
+            <button
+              onClick={dismissNotifications}
+              className="relative p-2 rounded-full transition-colors hover:bg-white/10 active:scale-90"
+            >
               <Bell size={20} className="text-white/70" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-black/40" />
+              {notifications > 0 && (
+                <motion.span
+                  className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-black/40"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  {notifications}
+                </motion.span>
+              )}
             </button>
             <button className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-purple-500/50 transition-transform active:scale-90">
               <img

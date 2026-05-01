@@ -52,9 +52,20 @@ export interface WatchProgress {
   progress: number; // 0-100
 }
 
+export interface Review {
+  id: string;
+  seriesId: string;
+  author: string;
+  rating: number; // 1-5
+  text: string;
+  date: string;
+}
+
 export type AppView =
   | { type: 'home' }
   | { type: 'series'; seriesId: string }
+  | { type: 'episode'; seriesId: string; seasonNumber: number; episodeNumber: number }
+  | { type: 'cast'; castName: string; castPhoto: string; castRole: string }
   | { type: 'search'; query?: string }
   | { type: 'watchlist' }
   | { type: 'profile' }

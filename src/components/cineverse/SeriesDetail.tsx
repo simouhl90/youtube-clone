@@ -12,16 +12,22 @@ import {
   ChevronUp,
   Clock,
 } from 'lucide-react';
+import type { Review } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { getSeriesById, series as allSeries } from '@/lib/mock-data';
 import SeriesRow from './SeriesRow';
 
 export default function SeriesDetail() {
-  const { currentView, goBack, toggleWatchlist, watchlist } = useAppStore();
+  const { currentView, goBack, navigate, toggleWatchlist, watchlist, addReview } = useAppStore();
   const seriesId = currentView.type === 'series' ? currentView.seriesId : '';
   const series = getSeriesById(seriesId);
+  const storeReviews = useAppStore((s) => s.reviews.filter((r: Review) => r.seriesId === seriesId));
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [hoverRating, setHoverRating] = useState(0);
 
   if (!series) {
     return (
@@ -162,6 +168,7 @@ export default function SeriesDetail() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          onClick={() => navigate({ type: 'episode', seriesId: series.id, seasonNumber: 1, episodeNumber: 1 })}
           className="w-full mt-5 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/25"
         >
           <Play size={20} fill="white" />
@@ -232,6 +239,7 @@ export default function SeriesDetail() {
                   rating={ep.rating}
                   thumbnail={ep.thumbnail}
                   index={i}
+                  onClick={() => navigate({ type: 'episode', seriesId: series.id, seasonNumber: selectedSeason, episodeNumber: ep.number })}
                 />
               ))}
             </div>
@@ -244,9 +252,11 @@ export default function SeriesDetail() {
             <h3 className="text-sm font-semibold text-white/80 mb-3">Cast</h3>
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
               {series.cast.map((member) => (
-                <div
+                <motion.button
                   key={member.name}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate({ type: 'cast', castName: member.name, castPhoto: member.photo, castRole: member.role })}
+                  className="flex-shrink-0 flex flex-col items-center gap-2 w-20 cursor-pointer"
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-white/10 shadow-lg shadow-purple-500/10">
                     <img
@@ -262,11 +272,87 @@ export default function SeriesDetail() {
                   <p className="text-[10px] text-white/40 text-center truncate w-full">
                     {member.role}
                   </p>
-                </div>
+                </motion.button>
               ))}
             </div>
           </div>
         )}
+
+        {/* Reviews */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-white/80">Reviews</h3>
+            <button
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="text-xs font-medium text-purple-400 hover:text-purple-300"
+            >
+              {showReviewForm ? 'Cancel' : 'Write Review'}
+            </button>
+          </div>
+
+          {showReviewForm && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-1 mb-3">
+                {[1,2,3,4,5].map((star) => (
+                  <button key={star} onClick={() => setReviewRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}>
+                    <Star size={24} className={star <= (hoverRating || reviewRating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'} />
+                  </button>
+                ))}
+                <span className="text-xs text-white/40 ml-2">{reviewRating > 0 ? `${reviewRating}/5` : 'Select rating'}</span>
+              </div>
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Share your thoughts..."
+                className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-white/30 resize-none h-20 focus:outline-none focus:border-purple-500/50"
+              />
+              <button
+                onClick={() => {
+                  if (reviewRating > 0 && reviewText.trim()) {
+                    addReview({
+                      id: `r-${Date.now()}`,
+                      seriesId: series.id,
+                      author: 'CineViewer',
+                      rating: reviewRating,
+                      text: reviewText,
+                      date: new Date().toISOString().split('T')[0],
+                    });
+                    setReviewRating(0);
+                    setReviewText('');
+                    setShowReviewForm(false);
+                  }
+                }}
+                disabled={reviewRating === 0 || !reviewText.trim()}
+                className="mt-2 w-full py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Submit Review
+              </button>
+            </motion.div>
+          )}
+
+          {storeReviews.length === 0 && !showReviewForm ? (
+            <p className="text-sm text-white/30">No reviews yet. Be the first to review!</p>
+          ) : (
+            <div className="space-y-3">
+              {storeReviews.map((review) => (
+                <div key={review.id} className="p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-white">{review.author}</span>
+                      <div className="flex gap-0.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <Star key={s} size={10} className={s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'} />
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-xs text-white/30">{review.date}</span>
+                  </div>
+                  <p className="text-xs text-white/50 leading-relaxed">{review.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Similar Series */}
         {similarSeries.length > 0 && (
@@ -287,6 +373,7 @@ function EpisodeItem({
   rating,
   thumbnail,
   index,
+  onClick,
 }: {
   episodeNumber: number;
   title: string;
@@ -295,12 +382,14 @@ function EpisodeItem({
   rating: number;
   thumbnail: string;
   index: number;
+  onClick?: () => void;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
+      onClick={onClick}
       className="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/[0.07] transition-colors cursor-pointer"
     >
       {/* Thumbnail */}

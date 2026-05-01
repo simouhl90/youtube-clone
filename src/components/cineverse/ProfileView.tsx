@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Bell, Moon, ChevronRight, Award, Clock, Heart, CheckCircle } from 'lucide-react';
+import { Settings, Bell, Moon, Sun, ChevronRight, Award, Clock, Heart, CheckCircle } from 'lucide-react';
 import BottomNav from './BottomNav';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -12,17 +13,27 @@ const stats = [
 ];
 
 const settingsItems = [
-  { icon: Moon, label: 'Appearance', subtitle: 'Dark mode', color: 'text-purple-400' },
   { icon: Bell, label: 'Notifications', subtitle: 'Push & email', color: 'text-pink-400' },
   { icon: Settings, label: 'General', subtitle: 'Language, region', color: 'text-cyan-400' },
 ];
 
 export default function ProfileView() {
   const { watchlist } = useAppStore();
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   const dynamicStats = stats.map((s) =>
     s.label === 'In Watchlist' ? { ...s, value: String(watchlist.size) } : s
   );
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    if (next === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    setTheme(next);
+  };
 
   return (
     <div className="min-h-screen pb-28">
@@ -98,6 +109,45 @@ export default function ProfileView() {
         >
           <h3 className="text-sm font-semibold text-white/60 mb-3 px-1">Settings</h3>
           <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden divide-y divide-white/5">
+            {/* Appearance Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors active:bg-white/[0.08]"
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+                {theme === 'dark' ? (
+                  <Moon size={18} className="text-purple-400" />
+                ) : (
+                  <Sun size={18} className="text-yellow-400" />
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-white">Appearance</p>
+                <p className="text-xs text-white/40">
+                  {theme === 'dark' ? 'Dark' : 'Light'} mode
+                </p>
+              </div>
+              <div
+                className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    : 'bg-white/20'
+                }`}
+              >
+                <motion.div
+                  className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md flex items-center justify-center"
+                  animate={{ left: theme === 'dark' ? 26 : 2 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                >
+                  {theme === 'dark' ? (
+                    <Moon size={12} className="text-purple-600" />
+                  ) : (
+                    <Sun size={12} className="text-yellow-500" />
+                  )}
+                </motion.div>
+              </div>
+            </button>
+
             {settingsItems.map((item) => {
               const Icon = item.icon;
               return (
