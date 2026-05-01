@@ -71,8 +71,8 @@ export default function SearchView() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            onFocus={() => inputRef.current?.select()}
+            onBlur={() => {}}
             placeholder="Search series, genres, actors..."
             className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:bg-white/[0.07] transition-all"
           />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getVideoById, getRelatedVideos } from '@/lib/mock-data';
+import { getSeriesById, getSeriesByGenre, series as allSeries } from '@/lib/mock-data';
 
 export async function GET(
   request: NextRequest,
@@ -7,21 +7,26 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const video = getVideoById(id);
+    const seriesData = getSeriesById(id);
 
-    if (!video) {
-      return NextResponse.json({ error: 'Video not found' }, { status: 404 });
+    if (!seriesData) {
+      return NextResponse.json({ error: 'Series not found' }, { status: 404 });
     }
 
-    const relatedVideos = getRelatedVideos(id);
+    // Return related series (same genre)
+    const relatedSeries = seriesData.genre
+      .flatMap((genre) => getSeriesByGenre(genre))
+      .filter((s) => s.id !== id)
+      .filter((s, i, arr) => arr.findIndex((x) => x.id === s.id) === i)
+      .slice(0, 10);
 
     return NextResponse.json({
-      video,
-      comments: video.comments || [],
-      relatedVideos,
+      video: seriesData,
+      comments: [],
+      relatedVideos: relatedSeries,
     });
   } catch (error) {
-    console.error('Error fetching video:', error);
-    return NextResponse.json({ error: 'Failed to fetch video' }, { status: 500 });
+    console.error('Error fetching series:', error);
+    return NextResponse.json({ error: 'Failed to fetch series' }, { status: 500 });
   }
 }

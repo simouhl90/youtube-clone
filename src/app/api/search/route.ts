@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchVideos } from '@/lib/mock-data';
+import { searchSeries } from '@/lib/mock-data';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ videos: [], nextCursor: null });
     }
 
-    const videos = searchVideos(query);
-    return NextResponse.json({ videos, nextCursor: null });
+    const results = searchSeries(query);
+    return NextResponse.json({ videos: results, nextCursor: null });
   } catch (error) {
-    console.error('Error searching videos:', error);
-    return NextResponse.json({ error: 'Failed to search videos' }, { status: 500 });
+    console.error('Error searching series:', error);
+    return NextResponse.json({ error: 'Failed to search series' }, { status: 500 });
   }
 }

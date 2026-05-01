@@ -13,7 +13,7 @@ interface ContinueWatchingProps {
 
 export default function ContinueWatching({ items }: ContinueWatchingProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { navigate, updateProgress } = useAppStore();
+  const { navigate } = useAppStore();
 
   if (items.length === 0) return null;
 

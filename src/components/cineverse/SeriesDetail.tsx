@@ -15,10 +15,9 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { getSeriesById, series as allSeries } from '@/lib/mock-data';
 import SeriesRow from './SeriesRow';
-import type { Season } from '@/types';
 
 export default function SeriesDetail() {
-  const { currentView, goBack, toggleWatchlist, watchlist, navigate } = useAppStore();
+  const { currentView, goBack, toggleWatchlist, watchlist } = useAppStore();
   const seriesId = currentView.type === 'series' ? currentView.seriesId : '';
   const series = getSeriesById(seriesId);
   const [selectedSeason, setSelectedSeason] = useState(1);

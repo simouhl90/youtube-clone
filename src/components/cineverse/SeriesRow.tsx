@@ -5,7 +5,6 @@ import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SeriesCard from './SeriesCard';
 import type { Series } from '@/types';
-import { useAppStore } from '@/store/useAppStore';
 
 interface SeriesRowProps {
   title: string;
@@ -16,7 +15,6 @@ interface SeriesRowProps {
 
 export default function SeriesRow({ title, series, emoji, onSeeAll }: SeriesRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { navigate } = useAppStore();
 
   return (
     <motion.section
