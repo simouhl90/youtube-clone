@@ -15,6 +15,7 @@ import { getSeriesById } from '@/lib/mock-data';
 
 export default function EpisodePlayer() {
   const { currentView, goBack, navigate, toggleWatchlist, watchlist, updateProgress } = useAppStore();
+
   const seriesId = currentView.type === 'episode' ? currentView.seriesId : '';
   const seasonNumber = currentView.type === 'episode' ? currentView.seasonNumber : 1;
   const episodeNumber = currentView.type === 'episode' ? currentView.episodeNumber : 1;
@@ -80,25 +81,46 @@ export default function EpisodePlayer() {
   }, [series, seasonNumber, episodeNumber]);
 
   useEffect(() => {
-    if (series && episode) {
-      updateProgress({
-        seriesId,
-        seasonNumber,
-        episodeNumber,
-        progress: Math.floor(Math.random() * 35),
-      });
+    if (series && episode && seriesId) {
+      try {
+        updateProgress({
+          seriesId,
+          seasonNumber,
+          episodeNumber,
+          progress: Math.floor(Math.random() * 35),
+        });
+      } catch {
+        // Ignore progress update errors - non-critical
+      }
     }
   }, [seriesId, seasonNumber, episodeNumber, series, episode, updateProgress]);
 
   if (!series || !episode) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
-        <p className="text-white/40">Episode not found</p>
+      <div className="min-h-screen bg-[#0a0a1a]">
+        <div className="sticky top-0 z-30 flex items-center px-4 py-3 pt-14 bg-[#0a0a1a]/80 backdrop-blur-xl">
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={goBack}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl flex items-center justify-center border border-white/10"
+          >
+            <ArrowLeft size={18} className="text-white" />
+          </motion.button>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <p className="text-white/40">Episode not found</p>
+        </div>
       </div>
     );
   }
 
   const isWatchlisted = watchlist.has(series.id);
+  const safeRating = typeof episode.rating === 'number' ? episode.rating : 0;
+  const safeAirDate = episode.airDate || '';
+  const safeThumbnail = episode.thumbnail || series.backdrop || '';
+  const safeTitle = episode.title || 'Unknown Episode';
+  const safeDuration = episode.duration || '—';
+  const safeDescription = episode.description || 'No description available.';
 
   return (
     <div className="min-h-screen bg-[#0a0a1a]">
@@ -118,7 +140,7 @@ export default function EpisodePlayer() {
         </motion.button>
 
         <h1 className="text-sm font-semibold gradient-text truncate max-w-[60%] text-center">
-          {episode.title}
+          {safeTitle}
         </h1>
 
         <motion.button
@@ -140,10 +162,14 @@ export default function EpisodePlayer() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="relative w-full aspect-video overflow-hidden"
       >
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${episode.thumbnail})` }}
-        />
+        {safeThumbnail ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${safeThumbnail})` }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-pink-900/40" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
         <div className="absolute inset-0 bg-[#0a0a1a]/30" />
 
@@ -183,33 +209,35 @@ export default function EpisodePlayer() {
 
         {/* Title */}
         <h2 className="text-xl font-bold text-white mt-1">
-          {episode.title}
+          {safeTitle}
         </h2>
 
         {/* Metadata Row */}
         <div className="flex items-center gap-3 mt-3">
           <div className="flex items-center gap-1">
             <Clock size={13} className="text-white/40" />
-            <span className="text-sm text-white/50">{episode.duration}</span>
+            <span className="text-sm text-white/50">{safeDuration}</span>
           </div>
           <div className="flex items-center gap-1">
             <Star size={13} className="fill-yellow-400 text-yellow-400" />
             <span className="text-sm font-semibold text-yellow-400">
-              {episode.rating.toFixed(1)}
+              {safeRating.toFixed(1)}
             </span>
           </div>
-          <span className="text-sm text-white/40">
-            {new Date(episode.airDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
+          {safeAirDate && (
+            <span className="text-sm text-white/40">
+              {new Date(safeAirDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          )}
         </div>
 
         {/* Description */}
         <p className="text-sm text-white/50 mt-3 line-clamp-4 leading-relaxed">
-          {episode.description}
+          {safeDescription}
         </p>
 
         {/* Action Buttons */}

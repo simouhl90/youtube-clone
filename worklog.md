@@ -260,3 +260,25 @@ Stage Summary:
 - Country and Language info rows added to SeriesDetail meta section
 - Studio route wired into CineVerseApp with AnimatePresence transitions
 - Infinite scroll on SearchView with IntersectionObserver, progressive loading, and animated spinner sentinel
+
+---
+Task ID: 4
+Agent: Main Orchestrator
+Task: Fix EpisodePlayer runtime error ("Something went wrong" when opening a video)
+
+Work Log:
+- Analyzed all components in the CineVerse app flow: CineVerseApp → SeriesDetail → EpisodePlayer
+- Verified mock data integrity (30 series, all with valid episodes, seasons, cast)
+- Checked all navigation paths to episode view (Play First Episode button, episode item clicks)
+- Ran lint - no errors in existing code
+
+Fixes applied:
+1. ErrorBoundary.tsx - Enhanced with componentDidCatch for error logging, error state storage, Go Back/Go Home/Reload buttons, dev-mode error display
+2. CineVerseApp.tsx - Each view now wrapped in its own isolated ErrorBoundary via ViewErrorBoundary wrapper; one view crash no longer kills the entire app
+3. EpisodePlayer.tsx - Added defensive null checks on all data properties (safeRating, safeAirDate, safeThumbnail, safeTitle, safeDuration, safeDescription), fallback gradient background, conditional air date display, try/catch on updateProgress
+
+Stage Summary:
+- ErrorBoundary now logs errors and provides Go Back / Go Home / Reload recovery options
+- Each view isolated with its own ErrorBoundary - one view crashing doesn't kill the whole app
+- EpisodePlayer has defensive null checks on all data properties
+- Users can recover from errors without losing their entire session
